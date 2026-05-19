@@ -52,6 +52,22 @@ impl Text {
         self.text_field
             .setFrame(CGRect::new(CGPoint::new(x, y), frame.size));
     }
+
+    pub fn set_editable(&self, editable: bool) {
+        self.text_field.setEditable(editable);
+    }
+
+    pub fn set_selectable(&self, selectable: bool) {
+        self.text_field.setSelectable(selectable);
+    }
+
+    pub fn set_font(&self, font: &str) {
+        let Some(font) = &NSFont::fontWithName_size(&NSString::from_str(font), 14.) else {
+            return;
+        };
+
+        self.text_field.setFont(Some(font));
+    }
 }
 
 impl Into<View> for Text {

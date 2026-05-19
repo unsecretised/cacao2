@@ -3,6 +3,8 @@ use objc2_app_kit::NSView;
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_core_graphics::CGColor;
 
+use crate::window::Window;
+
 pub mod button;
 pub mod text;
 
@@ -78,4 +80,57 @@ impl View {
     pub fn add_subview(&self, view: &View) {
         self.view.addSubview(&view.view);
     }
+
+    pub fn anchor_in_window(&self, window: &Window, anchor: Anchor) {
+        let window_frame = window.window.frame();
+        let view_frame = self.view.frame();
+
+        let (x, y) = match anchor {
+            Anchor::Center => (
+                (window_frame.size.width - view_frame.size.width) / 2.0,
+                (window_frame.size.height - view_frame.size.height) / 2.0,
+            ),
+            Anchor::CenterHorizontal => (
+                (window_frame.size.width - view_frame.size.width) / 2.0,
+                view_frame.origin.y,
+            ),
+            Anchor::CenterVertical => (
+                view_frame.origin.x,
+                (window_frame.size.height - view_frame.size.height) / 2.0,
+            ),
+        };
+
+        self.view
+            .setFrame(CGRect::new(CGPoint::new(x, y), view_frame.size));
+    }
+
+    pub fn anchor_in_view(&self, parent: &View, anchor: Anchor) {
+        let parent_frame = parent.view.frame();
+        let view_frame = self.view.frame();
+
+        let (x, y) = match anchor {
+            Anchor::Center => (
+                (parent_frame.size.width - view_frame.size.width) / 2.0,
+                (parent_frame.size.height - view_frame.size.height) / 2.0,
+            ),
+            Anchor::CenterHorizontal => (
+                (parent_frame.size.width - view_frame.size.width) / 2.0,
+                view_frame.origin.y,
+            ),
+            Anchor::CenterVertical => (
+                view_frame.origin.x,
+                (parent_frame.size.height - view_frame.size.height) / 2.0,
+            ),
+        };
+
+        self.view
+            .setFrame(CGRect::new(CGPoint::new(x, y), view_frame.size));
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Anchor {
+    Center,
+    CenterHorizontal,
+    CenterVertical,
 }
