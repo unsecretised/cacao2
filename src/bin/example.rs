@@ -1,12 +1,12 @@
 use cacao2::{
     application::{ActivationPolicy, Application},
-    view::{Anchor, Radius, View, text::Text},
+    view::{Anchor, Radius, View, button::Button, text::Text},
     window::{Window, titlebar::TitlebarConfig},
 };
 
 fn main() {
     let window = Window::new();
-    let mut app = Application::new((), ActivationPolicy::Accessory);
+    let mut app = Application::new((), ActivationPolicy::Regular);
 
     app.add_window(&window);
 
@@ -47,6 +47,16 @@ fn main() {
     window.set_titlebar_config(&titlebar);
 
     window.view(&view);
+
+    let button = Button::new("Click me");
+    button.set_size(100., 100.);
+    button.set_pos(100., 100.);
+    button.set_bg_color((0.3, 0.3, 0.5, 1.));
+
+    let button_view: View = button.into();
+
+    button_view.anchor_in_view(&view, Anchor::Center);
+    view.add_subview(&button_view);
 
     app.run();
 }
