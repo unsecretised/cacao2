@@ -1,6 +1,6 @@
 use cacao2::{
     application::{ActivationPolicy, Application},
-    view::{Radius, View},
+    view::{Radius, View, text::Text},
     window::{Window, titlebar::TitlebarConfig},
 };
 
@@ -24,9 +24,19 @@ fn main() {
 
     let rad = Radius::new(10.);
 
-    view.set_position((100., 200.));
+    view.set_size((500., 500.));
+    view.set_pos((100., 100.));
 
     view.set_corner_radius(rad);
+
+    let text = Text::new("Something");
+
+    text.set_font_size(40.);
+
+    let text_view: View = text.into();
+
+    text_view.set_size((500., 500.));
+    view.add_subview(&text_view);
 
     window.set_bg_color((0.3, 0.1, 0.4, 0.7));
     window.set_titlebar_config(&titlebar);

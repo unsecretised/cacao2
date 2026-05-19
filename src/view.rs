@@ -1,26 +1,19 @@
 use objc2::{MainThreadMarker, rc::Retained};
 use objc2_app_kit::NSView;
-use objc2_core_foundation::{CGRect, CGSize};
+use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_core_graphics::CGColor;
 
 pub mod button;
+pub mod text;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Radius {
-    pub top_left: f64,
-    pub top_right: f64,
-    pub bottom_left: f64,
-    pub bottom_right: f64,
+    pub radius: f64,
 }
 
 impl Radius {
     pub fn new(rad: f64) -> Self {
-        Self {
-            top_left: rad,
-            top_right: rad,
-            bottom_left: rad,
-            bottom_right: rad,
-        }
+        Self { radius: rad }
     }
 }
 
@@ -60,14 +53,26 @@ impl View {
             return;
         };
 
-        layer.setCornerRadius(rad.top_left);
+        layer.setCornerRadius(rad.radius);
         layer.setMasksToBounds(true);
     }
 
-    pub fn set_position(&self, dims: (f64, f64)) {
+    pub fn set_size(&self, dims: (f64, f64)) {
         let frame = self.view.frame();
         self.view
             .setFrame(CGRect::new(frame.origin, CGSize::new(dims.0, dims.1)));
+    }
+
+    pub(crate) fn set_content(&self, view: Retained<NSView>) {
+        self.view.addSubview(&view);
+    }
+
+    pub fn set_pos(&self, pos_coords: (f64, f64)) {
+        let frame = self.view.frame();
+        self.view.setFrame(CGRect::new(
+            CGPoint::new(pos_coords.0, pos_coords.1),
+            frame.size,
+        ));
     }
 
     pub fn add_subview(&self, view: &View) {
