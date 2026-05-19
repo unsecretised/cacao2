@@ -1,18 +1,31 @@
 use objc2::rc::Retained;
 use objc2_app_kit::{
-    NSBackingStoreType, NSColor, NSWindow, NSWindowButton, NSWindowStyleMask,
-    NSWindowTitleVisibility,
+    NSBackingStoreType, NSColor, NSFloatingWindowLevel, NSWindow, NSWindowButton,
+    NSWindowStyleMask, NSWindowTitleVisibility,
 };
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{MainThreadMarker, NSString};
 
-use crate::view::View;
+use crate::view::{Frame, View};
 
+pub mod menubar;
 pub mod titlebar;
 
 pub struct Window {
     pub(crate) window: Retained<NSWindow>,
     pub(crate) prelaunch: fn(&Retained<NSWindow>),
+}
+
+pub enum WindowLevel {
+    Normal,
+    Below,
+    Above,
+}
+
+impl Default for Window {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Window {
@@ -43,6 +56,33 @@ impl Window {
             window,
             prelaunch: Self::default_window_prelaunch,
         }
+    }
+
+    pub fn frame(&self) -> Frame {
+        let frame = self
+            .window
+            .contentView()
+            .map(|v| v.frame())
+            .unwrap_or_else(|| self.window.frame());
+        Frame {
+            origin: (frame.origin.x, frame.origin.y),
+            size: (frame.size.width, frame.size.height),
+        }
+    }
+
+    pub fn move_window(&self, x: f64, y: f64) {
+        let frame = self.window.frame();
+        self.window
+            .setFrame_display(CGRect::new(CGPoint::new(x, y), frame.size), false);
+    }
+
+    pub fn set_level(&self, level: WindowLevel) -> &Self {
+        self.window.setLevel(match level {
+            WindowLevel::Normal => 0,
+            WindowLevel::Below => -1,
+            WindowLevel::Above => NSFloatingWindowLevel + 100,
+        });
+        self
     }
 
     pub fn resize(&mut self, width: f64, height: f64, animate: bool) {
@@ -113,7 +153,9 @@ impl Window {
     }
 
     pub fn view(&self, view: &View) {
-        self.window.contentView().map(|x| x.addSubview(&view.view));
+        if let Some(x) = self.window.contentView() {
+            x.addSubview(&view.view)
+        }
     }
 
     fn default_window_prelaunch(window: &Retained<NSWindow>) {

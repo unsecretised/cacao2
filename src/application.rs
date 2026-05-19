@@ -1,5 +1,5 @@
 use objc2::{MainThreadMarker, rc::Retained};
-use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy};
+use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSScreen};
 
 use crate::window::Window;
 
@@ -54,6 +54,18 @@ impl<'a, T> Application<'a, T> {
         };
 
         self.app.setActivationPolicy(raw_act_policy);
+    }
+
+    pub fn new_window(&self) -> Window {
+        Window::new()
+    }
+
+    pub fn monitor_dimensions(&self) -> Option<(f64, f64)> {
+        let mtm = MainThreadMarker::new().expect("Must be on main thread");
+        NSScreen::mainScreen(mtm).map(|ns_screen| {
+            let screen_size = ns_screen.frame().size;
+            (screen_size.width, screen_size.height)
+        })
     }
 
     pub fn run(&self) {

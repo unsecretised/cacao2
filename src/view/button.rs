@@ -51,10 +51,10 @@ impl Button {
     }
 }
 
-impl Into<View> for Button {
-    fn into(self) -> View {
+impl From<Button> for View {
+    fn from(val: Button) -> Self {
         let view = View::new();
-        view.set_content(self.button.downcast().unwrap());
+        view.set_content(val.button.downcast().unwrap());
         view
     }
 }
