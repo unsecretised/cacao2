@@ -7,7 +7,7 @@ fn main() {
 
     let app = NSApplication::sharedApplication(mtm);
 
-    let window = Window::new((100., 100.), ());
+    let window = Window::new((100., 100.));
     window.show();
 
     app.run();

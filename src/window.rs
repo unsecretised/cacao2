@@ -1,18 +1,15 @@
-use std::sync::{Arc, Mutex};
-
 use objc2::rc::Retained;
 use objc2_app_kit::{NSBackingStoreType, NSColor, NSWindow, NSWindowStyleMask};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_foundation::{MainThreadMarker, NSString, ns_string};
 
-pub struct Window<T: Clone> {
-    window: Retained<NSWindow>,
-    prelaunch: fn(&Retained<NSWindow>),
-    data: Arc<Mutex<T>>,
+pub struct Window {
+    pub(crate) window: Retained<NSWindow>,
+    pub(crate) prelaunch: fn(&Retained<NSWindow>),
 }
 
-impl<T: Clone> Window<T> {
-    pub fn new(origin: (f64, f64), data: T) -> Self {
+impl Window {
+    pub fn new(origin: (f64, f64)) -> Self {
         let mtm = MainThreadMarker::new().expect("Must be on main thread");
 
         let rect = CGRect::new(
@@ -38,7 +35,6 @@ impl<T: Clone> Window<T> {
         Self {
             window,
             prelaunch: Self::default_window_prelaunch,
-            data: Arc::new(Mutex::new(data)),
         }
     }
 
