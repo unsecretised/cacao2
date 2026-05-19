@@ -1,7 +1,11 @@
 use objc2::rc::Retained;
-use objc2_app_kit::{NSBackingStoreType, NSColor, NSWindow, NSWindowStyleMask};
+use objc2_app_kit::{
+    NSBackingStoreType, NSColor, NSWindow, NSWindowStyleMask, NSWindowTitleVisibility,
+};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
-use objc2_foundation::{MainThreadMarker, NSString, ns_string};
+use objc2_foundation::{MainThreadMarker, NSString};
+
+mod titlebar;
 
 pub struct Window {
     pub(crate) window: Retained<NSWindow>,
@@ -69,13 +73,29 @@ impl Window {
             )));
     }
 
+    pub fn set_visibility(&self, visible: bool) {
+        self.window.setIsVisible(visible);
+    }
+
+    pub fn toggle_visibility(&self) {
+        self.window.setIsVisible(!self.window.isVisible());
+    }
+
+    pub fn apply_titlebar_config(&self, config: &titlebar::TitlebarConfig) {
+        self.set_title(&config.title);
+        self.set_visibility(config.visible);
+    }
+
     fn default_window_prelaunch(window: &Retained<NSWindow>) {
-        window.setTitle(ns_string!("cacao2"));
         window.setMovableByWindowBackground(true);
+        window.setTitlebarAppearsTransparent(true);
+        window.setTitleVisibility(NSWindowTitleVisibility::Hidden);
+        window.setBackgroundColor(Some(&NSColor::whiteColor()));
         window.setStyleMask(
             NSWindowStyleMask::Titled
                 | NSWindowStyleMask::Closable
-                | NSWindowStyleMask::Miniaturizable,
+                | NSWindowStyleMask::Miniaturizable
+                | NSWindowStyleMask::Resizable,
         );
     }
 }
