@@ -1,6 +1,6 @@
 use cacao2::{
     application::{ActivationPolicy, Application},
-    view::{Alignment, Color, Radius, View, text::Text},
+    view::{Alignment, Color, Radius, View, button::Button, text::Text},
     window::{WindowLevel, titlebar::TitlebarConfig},
 };
 
@@ -32,26 +32,11 @@ fn main() {
         .set_size((500., 500.))
         .align_x(frame, Alignment::Center)
         .align_y(frame, Alignment::Center)
-        .set_bg_color((1., 1., 1., 1.))
         .set_corner_radius(rad);
 
-    let text_view: View = Text::new("Something")
-        .set_font_size(50.)
-        .set_font("Iosevka")
-        .set_text_color(Color {
-            r: 0.,
-            g: 0.,
-            b: 0.,
-            a: 1.,
-        })
-        .text_align(Alignment::Center)
-        .set_selectable(true)
-        .into();
-
-    text_view.align_y(view.frame(), Alignment::Center);
-    text_view.align_x(view.frame(), Alignment::Center);
-
-    view.add_subview(&text_view);
+    let btn_view: View = Button::new("Hello", || println!("Hello world")).into();
+    btn_view.set_pos((0., 0.));
+    view.add_subview(&btn_view);
 
     window.set_bg_color((0., 0., 0., 0.3));
     window.set_titlebar_config(&titlebar);

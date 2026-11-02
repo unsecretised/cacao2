@@ -1,7 +1,10 @@
+use std::cell::RefCell;
+
 use objc2::{MainThreadMarker, rc::Retained};
 use objc2_app_kit::{NSColor, NSView};
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_core_graphics::CGColor;
+use objc2_foundation::NSObject;
 
 pub mod button;
 pub mod text;
@@ -47,6 +50,7 @@ pub enum Alignment {
 
 pub struct View {
     pub(crate) view: Retained<NSView>,
+    keep_alive: RefCell<Vec<Retained<NSObject>>>,
 }
 
 impl Default for View {
@@ -61,7 +65,15 @@ impl View {
         let view = NSView::new(mtm);
         view.setWantsLayer(true);
 
-        Self { view }
+        Self {
+            view,
+            keep_alive: RefCell::new(Vec::new()),
+        }
+    }
+
+    pub(crate) fn keep_alive(&self, obj: Retained<NSObject>) -> &Self {
+        self.keep_alive.borrow_mut().push(obj);
+        self
     }
 
     pub fn frame(&self) -> Frame {
