@@ -1,47 +1,45 @@
 use cacao2::{
-    application::{ActivationPolicy, Application},
-    view::{Alignment, Color, Radius, View, button::Button, text::Text},
-    window::{WindowLevel, titlebar::TitlebarConfig},
+    application::Application,
+    view::{View, button::Button, text::Text},
+    window::{Window, titlebar::TitlebarConfig},
 };
 
+pub struct State {
+    counter: u32,
+}
+
+pub enum Message {
+    ButtonClicked,
+}
+
+impl State {
+    pub fn view(&self) -> View {
+        let view = View::new();
+        view.set_bg_color((0., 0., 0., 0.));
+        view.add_subview(&Text::new(&format!("Count at: {}", self.counter)).into());
+        view
+    }
+
+    pub fn update(&mut self, msg: Message) {
+        match msg {
+            Message::ButtonClicked => self.counter += 1,
+        }
+    }
+}
+
 fn main() {
-    let mut app = Application::new((), ActivationPolicy::Accessory);
+    let state = State { counter: 10 };
+    let mut app = Application::new(state, Box::new(State::view), Box::new(State::update));
+    let window = Window::new();
+    window.set_bg_color((1., 0., 0., 1.));
+    window.set_opaque(false);
 
-    let window = app.new_window();
+    let mut title_conf = TitlebarConfig::new("Abcd".to_string());
+    title_conf.set_visible(true);
+    title_conf.set_transparent(true);
 
-    window.set_level(WindowLevel::Above);
-    app.add_window(&window);
+    window.set_titlebar_config(&title_conf);
 
-    window.show();
-
-    let monitor_dims = app.monitor_dimensions().unwrap();
-
-    window.move_window(monitor_dims.0 / 2., monitor_dims.1 / 2.);
-
-    let mut titlebar = TitlebarConfig::new("Someone".to_string());
-    titlebar
-        .set_visible(false)
-        .set_transparent(true)
-        .set_traffic_lights(true);
-
-    let frame = window.frame();
-    let rad = Radius::new(10.);
-
-    let view = View::new();
-    let view = view
-        .set_size((500., 500.))
-        .align_x(frame, Alignment::Center)
-        .align_y(frame, Alignment::Center)
-        .set_corner_radius(rad);
-
-    let btn_view: View = Button::new("Hello", || println!("Hello world")).into();
-    btn_view.set_pos((0., 0.));
-    view.add_subview(&btn_view);
-
-    window.set_bg_color((0., 0., 0., 0.3));
-    window.set_titlebar_config(&titlebar);
-
-    window.view(&view);
-
+    app.add_window(window);
     app.run();
 }

@@ -158,14 +158,5 @@ impl Window {
         }
     }
 
-    fn default_window_prelaunch(window: &Retained<NSWindow>) {
-        window.setMovableByWindowBackground(true);
-        window.setBackgroundColor(Some(&NSColor::whiteColor()));
-        window.setStyleMask(
-            NSWindowStyleMask::Titled
-                | NSWindowStyleMask::Closable
-                | NSWindowStyleMask::Miniaturizable
-                | NSWindowStyleMask::Resizable,
-        );
-    }
+    fn default_window_prelaunch(_: &Retained<NSWindow>) {}
 }

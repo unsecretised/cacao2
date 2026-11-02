@@ -94,8 +94,8 @@ impl Text {
     }
 }
 
-impl From<&Text> for View {
-    fn from(val: &Text) -> Self {
+impl From<Text> for View {
+    fn from(val: Text) -> Self {
         let view = View::new();
         let frame = val.text_field.frame();
         view.view.setFrame(frame);

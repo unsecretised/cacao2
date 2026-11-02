@@ -1,12 +1,14 @@
 use objc2::{MainThreadMarker, rc::Retained};
 use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSScreen};
 
-use crate::window::Window;
+use crate::{view::View, window::Window};
 
-pub struct Application<'a, T> {
+pub struct Application<'a, T, M> {
     pub(crate) app: Retained<NSApplication>,
     pub windows: Vec<&'a Window>,
     pub data: T,
+    pub view_fn: Box<dyn Fn(&T) -> View>,
+    pub update_fn: Box<dyn Fn(&mut T, M)>,
 }
 
 pub enum ActivationPolicy {
@@ -15,35 +17,34 @@ pub enum ActivationPolicy {
     Prohibited,
 }
 
-impl<'a, T> Application<'a, T> {
-    pub fn new(data: T, activation_policy: ActivationPolicy) -> Self {
+impl<'a, T, M> Application<'a, T, M> {
+    pub fn new(
+        data: T,
+        view_fn: Box<dyn Fn(&T) -> View>,
+        update_fn: Box<dyn Fn(&mut T, M)>,
+    ) -> Self {
         let app = NSApplication::sharedApplication(
             MainThreadMarker::new().expect("Must be on main thread"),
         );
-
-        let raw_act_policy = match activation_policy {
-            ActivationPolicy::Regular => NSApplicationActivationPolicy::Regular,
-            ActivationPolicy::Accessory => NSApplicationActivationPolicy::Accessory,
-            ActivationPolicy::Prohibited => NSApplicationActivationPolicy::Prohibited,
-        };
-
-        app.setActivationPolicy(raw_act_policy);
 
         Self {
             app,
             windows: vec![],
             data,
+            view_fn,
+            update_fn,
         }
     }
 
-    /// Adds a window to the application
-    pub fn add_window(&mut self, window: &'a Window) {
-        self.windows.push(window);
+    pub fn init_default_window(&self) {
+        let new_window = Window::new();
+        new_window.view(&(self.view_fn)(&self.data));
+        new_window.show();
     }
 
-    /// Returns a reference to the windows
-    pub fn windows(&self) -> &Vec<&'a Window> {
-        &self.windows
+    pub fn add_window(&self, window: Window) {
+        window.view(&(self.view_fn)(&self.data));
+        window.show();
     }
 
     pub fn set_activation_policy(&self, policy: ActivationPolicy) {
@@ -54,10 +55,6 @@ impl<'a, T> Application<'a, T> {
         };
 
         self.app.setActivationPolicy(raw_act_policy);
-    }
-
-    pub fn new_window(&self) -> Window {
-        Window::new()
     }
 
     pub fn monitor_dimensions(&self) -> Option<(f64, f64)> {

@@ -1,12 +1,10 @@
-use std::cell::RefCell;
-
 use objc2::{
     DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send, rc::Retained, sel,
 };
 use objc2_app_kit::NSButton;
 use objc2_core_foundation::{CGPoint, CGRect, CGSize};
 use objc2_core_graphics::CGColor;
-use objc2_foundation::{NSObject, NSObjectNSKeyValueObservingCustomization, NSString};
+use objc2_foundation::{NSObject, NSString};
 
 use crate::view::View;
 
